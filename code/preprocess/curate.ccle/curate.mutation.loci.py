@@ -3,7 +3,7 @@
 ##################################################################################
 # curate ccle mutation in loci level
 
-proj_path = 'D:/projects/DLCell'
+proj_path = 'D:/projects/DLMed'
 import os
 import re
 import sys
@@ -14,7 +14,8 @@ from utility import utility as util
 
 geneanno_path = os.path.join(proj_path, 'data/curated/cancer.gene.anno.csv')
 mutation_path = os.path.join(proj_path, 'data/DepMap/CCLE_Mutation_20180718.txt')
-out_path = os.path.join(proj_path, 'data/curated/lung/ccle/lung_MutExpr_cancergene_loci.csv')
+out_path = os.path.join(proj_path, 'data/curated/lung/ccle/lung_Mutation_cancergene.csv')
+out_loci_path = os.path.join(proj_path, 'data/curated/lung/ccle/lung_Mutation_cancergene_loci.csv')
 
 
 ##############################      main      ################################
@@ -39,8 +40,9 @@ mutations['Mut'] = mutations['Mut'].apply(lambda x: re.findall(r':[0-9]*(.*)', x
 mutations = mutations[['Cell', 'Gene', 'MutChr', 'MutStart', 'Mut', 'MutClass']]
 mutations.sort_values(by=['Cell', 'MutStart', 'Gene'])
 mutations.reset_index(drop=True, inplace=True)
+mutations.to_csv(out_path, index=None)
 
 # divide genes
 gene_loc_encoder = util.geneLocEncoder(genes=mutations['Gene'], locs=mutations['MutStart'])
 mutations_loc = util.divideGene(mutations, gene_loc_encoder)
-mutations_loc.to_csv(out_path, index=None)
+mutations_loc.to_csv(out_loci_path, index=None)

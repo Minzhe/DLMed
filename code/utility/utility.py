@@ -5,22 +5,47 @@
 import re
 import numpy as np
 import pandas as pd
+from scipy.stats import shapiro, normaltest
 from sklearn.preprocessing import quantile_transform, scale
 
 
 # =========================  normalize  ============================= #
-def quantile_normalize(scoretable, center):
+def quantile_normalize(df, target='auto', ifcenter=True, ifscale=True):
     '''
-    quantile normalize to normal distribution and center to negative value
+    Quantile normalize data frame to target distribution and centered. 
+    If set target to auto, then regular quantile normalization, otherwise use sklearn version of quantile normalization.
     '''
-    scoretable.score = quantile_transform(scoretable.score.values.reshape(-1,1), output_distribution='normal', random_state=1234)
-    scoretable.score = scale(scoretable.score.values, with_mean=False, with_std=True)
-    neg = scoretable.loc[(scoretable.iloc[:,0] == 'negative') & (scoretable.iloc[:,1] == 'negative'),'score'].values
-    if center == 'negative':
-        scoretable.score = scoretable.score - neg
-    elif center == '0':
-        scoretable.score = scoretable.score - scoretable.score.mean()
-    return scoretable
+    scale(df, with_mean=ifcenter, with_std=ifscale, copy=False)
+    # if target == 'auto':
+    #     rank_mean = df.stack().groupby(df.rank(method='first').stack().astype(int)).mean()
+    #     df = df.rank(method='min').stack().astype(int).map(rank_mean).unstack()
+        
+    return df
+
+def safe_scale(df, max_std=None):
+    '''
+    Scale and reduce outlier value.
+    '''
+    scale(df, with_mean=True, with_std=True, copy=False)
+    if max_std is not None:
+        df[df > max_std] = max_std
+        df[df < -max_std] = -max_std
+        scale(df, with_mean=True, with_std=True, copy=False)
+    return df
+
+def detect_unnormal(df, test, cutoff):
+    '''
+    Detect distribution that do not look like bell shape and unimodal.
+    '''
+    pval = []
+    for col in df:
+        if test == 'shapiro':
+            stat, p = shapiro(df[col])
+        elif test == 'normaltest':
+            stat, p = normaltest(df[col])
+        pval.append(p)
+    pval = np.array(pval)
+    return pval, list(df.columns[pval < cutoff])
 
 
 # =========================  gene  ============================= #
@@ -104,4 +129,18 @@ def cleanCellLine(name):
         name = 'NCI' + name
     return name
 
+# =========================  drug  ============================= #
+def cleanDrugData(df, max_value=50, min_value=1e-5, duplicate='mean'):
+    '''
+    Clean drug sensitivity data.
+    '''
+    df.columns = ['Cell', 'Drug', 'LOG50']
+    df.Drug = df.Drug.str.upper()
+    df['LOG50'][df['LOG50'] > max_value] = max_value
+    df['LOG50'][df['LOG50'] < min_value] = min_value
+    df['LOG50'] = np.log(df['LOG50'])
+    if duplicate == 'mean':
+        df = df.groupby(by=['Cell', 'Drug'], as_index=False).mean()
+    df.index = list(range(df.shape[0]))
+    return df
 
