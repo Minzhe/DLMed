@@ -2,7 +2,7 @@
 ###                           curate.CNV.py                             ###
 ###########################################################################
 
-proj_path = 'D:/projects/DLCell'
+proj_path = 'D:/projects/DLMed'
 import numpy as np
 import pandas as pd
 import os
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 cnv_path = os.path.join(proj_path, 'data/UTSW_MW/Cell.Line.CNV.csv')
 geneanno_path = os.path.join(proj_path, 'data/curated/cancer.gene.anno.csv')
-out_path = os.path.join(proj_path, 'data/curated/Lung/utsw.mw/lung_CNV_cancergene.csv')
+out_path = os.path.join(proj_path, 'data/curated/Lung/utsw.mw/utsw.lung_CNV_cancergene.csv')
 
 ############################    main    ############################
 # read cancer gene list
@@ -31,11 +31,8 @@ cnv.index.name = None
 cnv.sort_index(inplace=True)
 cnv = cnv.transpose()
 cnv.index = cnv.index.to_series().apply(util.cleanCellLine)
+cnv = cnv.groupby(by=[cnv.index]).mean()
 cnv.sort_index(inplace=True)
 cnv = cnv - 2
-
-# plot density
-# p.plot_density(cnv, xlim=(-3,3), ylim=(0,1.3))
-# plt.show()
 
 cnv.to_csv(out_path)

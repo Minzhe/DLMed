@@ -9,7 +9,7 @@ from scipy.stats import shapiro, normaltest
 from sklearn.preprocessing import quantile_transform, scale
 
 
-# =========================  normalize  ============================= #
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  normalize  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
 def quantile_normalize(df, target='auto', ifcenter=True, ifscale=True):
     '''
     Quantile normalize data frame to target distribution and centered. 
@@ -48,7 +48,7 @@ def detect_unnormal(df, test, cutoff):
     return pval, list(df.columns[pval < cutoff])
 
 
-# =========================  gene  ============================= #
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>  gene  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
 def cleanAlias(name):
     '''
     Get alias of cell line name.
@@ -110,32 +110,37 @@ def divideGene(mut, gene_loc_encoder):
     mut.reset_index(drop=True, inplace=True)
     mut.columns = ['Cell', 'SubGene', 'Loci']
     
-    for idx, row in mut.iterrows():
-        if idx % 100 == 1: print(idx)
-        mut.loc[idx,['SubGene','Loci']] = gene_loc_encoder[(row['SubGene'], row['Loci'])]
+    mut['SubGene'], mut['Loci'] = zip(*list(mut.apply(lambda x: gene_loc_encoder[(x['SubGene'], x['Loci'])], axis=1)))
     mut.sort_values(by=['Cell', 'SubGene', 'Loci'], inplace=True)
     
     return mut
 
 
 
-# =========================  cell line  ============================= #
+# >>>>>>>>>>>>>>>>>>>>>>>>>>  cell line  <<<<<<<<<<<<<<<<<<<<<<<<<< #
 def cleanCellLine(name):
     '''
     Clean cell line name.
     '''
-    name = re.sub(r'[-_\[\]]', '', name.upper())
+    name = re.sub(r'_[ABCD]$', '', name.upper())
+    name = re.sub(r'[-_\[\]]', '', name)
     if re.match(r'^H[0-9]+$', name):
         name = 'NCI' + name
     return name
 
-# =========================  drug  ============================= #
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  drug  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
+def cleanDrugName(name):
+    '''
+    Clean drug name.
+    '''
+    return re.sub(r'[-,\s]', '', name).upper()
+
 def cleanDrugData(df, max_value=50, min_value=1e-5, duplicate='mean'):
     '''
     Clean drug sensitivity data.
     '''
     df.columns = ['Cell', 'Drug', 'LOG50']
-    df.Drug = df.Drug.str.upper()
+    df.Drug = df.Drug.apply(cleanDrugName)
     df['LOG50'][df['LOG50'] > max_value] = max_value
     df['LOG50'][df['LOG50'] < min_value] = min_value
     df['LOG50'] = np.log(df['LOG50'])

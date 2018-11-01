@@ -74,7 +74,7 @@ def mergeMutation(**mut):
     
     return mut_all
 
-def mergeExpression(merge_seq, gene_join='inner', fillna=0, **expr):
+def mergeExpression(keep_dup, gene_join='inner', fillna=0, **expr):
     '''
     Merge expression and cnv data.
     '''
@@ -91,24 +91,38 @@ def mergeExpression(merge_seq, gene_join='inner', fillna=0, **expr):
             expr[name] = expr[name].loc[:,expr[name].columns.to_series().isin(list(all_genes))]
     # merge according to the importance sequence
     expr_all = pd.DataFrame()
-    for name in merge_seq:
+    for name in keep_dup:
         tmp_expr = expr[name].loc[list(set(expr[name].index) - set(expr_all.index)),:]
         expr_all = pd.concat([expr_all, tmp_expr], sort=True)
     expr_all.sort_index(inplace=True)
     return expr_all
 
-def mergeDrug(duplicate='keep', **drug):
+def mergeDrug(keep_dup='all', **drug):
     '''
     Merge drug sensitivity data.
     '''
+    def prior_select(data, prior):
+        for item in prior:
+            if item in list(data):
+                return data == item
+        return pd.Series([False] * len(data))
+    # formate data
     for name in drug.keys():
         drug[name]['Source'] = name
     drug_all = pd.concat(drug.values())
     drug_all.sort_values(by=['Cell', 'Drug', 'Source'], inplace=True)
     drug_all.index = list(range(drug_all.shape[0]))
-    dup_idx = drug_all.duplicated(subset=['Cell', 'Drug'], keep=False)
-    if duplicate == 'keep':
-        return drug_all, drug_all.loc[dup_idx,:]
+    # duplicate
+    if keep_dup == 'all':
+        pass
+    elif all(pd.Series(keep_dup).isin(drug.keys())):
+        idx = drug_all.groupby(by=['Cell', 'Drug'], sort=False, as_index=False)['Source'].apply(lambda x: prior_select(x, keep_dup))
+        drug_all = drug_all.loc[list(idx),:]
+    else:
+        raise ValueError('Unrecognizable keep duplicate actions.')
+    drug_all.index = list(range(drug_all.shape[0]))
+
+    return drug_all
 
     
     
