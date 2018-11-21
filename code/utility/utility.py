@@ -5,8 +5,11 @@
 import re
 import numpy as np
 import pandas as pd
+from scipy.spatial import distance as dist
+from scipy.cluster import hierarchy as h
 from scipy.stats import shapiro, normaltest
 from sklearn.preprocessing import quantile_transform, scale
+import matplotlib.pyplot as plt
 
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  normalize  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
@@ -47,6 +50,45 @@ def detect_unnormal(df, test, cutoff):
     pval = np.array(pval)
     return pval, list(df.columns[pval < cutoff])
 
+# >>>>>>>>>>>>>>>>>>>>>>>>>  data matrix  <<<<<<<<<<<<<<<<<<<<<<<<<< #
+def sort_by_index(df, index, ascending, axis=0):
+    if axis == 0:
+        df['index'] = index
+        df.sort_values(by=['index'], ascending=ascending, axis=0, inplace=True)
+        del df['index']
+        return df
+    elif axis == 1:
+        df.loc['index'] = index
+        df.sort_values(by=['index'], ascending=ascending, axis=1, inplace=True)
+        df.drop(index=['index'], inplace=True)
+    return df
+
+def clusterMatrix(df, method, value_order=None):
+    '''
+    Reordering matrix by hierarchical clustering.
+    '''
+    if method == 'hclust':
+        # col
+        corr = np.asarray(df.corr())
+        col_linkage = h.linkage(dist.pdist(corr), method='average')
+        col_dn = np.array(h.dendrogram(col_linkage, distance_sort='ascending', color_threshold=0.01)['ivl'], dtype='int16')
+        # row
+        corr = np.asarray(df.T.corr())
+        row_linkage = h.linkage(dist.pdist(corr), method='average')
+        row_dn = np.array(h.dendrogram(row_linkage, distance_sort='ascending', color_threshold=0.01)['ivl'], dtype='int16')
+        df = df.iloc[row_dn, col_dn]
+    elif method == 'categorical' and value_order is not None:
+        df.sort_index(inplace=True)
+        df = df.reindex(sorted(df.columns), axis='columns')
+        # sort row
+        for value in list(reversed(value_order)):
+            index = df.apply(lambda x: 1 if value in x.values else 0, axis=1)
+            df = sort_by_index(df, index=index, ascending=False, axis=0)
+        # sort col
+        for value in list(reversed(value_order)):
+            index = df.apply(lambda x: 1 if value in x.values else 0, axis=0)
+            df = sort_by_index(df, index=index, ascending=False, axis=1)
+    return df
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>  gene  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
 def cleanAlias(name):
@@ -135,14 +177,16 @@ def cleanDrugName(name):
     '''
     return re.sub(r'[-,\s]', '', name).upper()
 
-def cleanDrugData(df, max_value=50, min_value=1e-5, duplicate='mean'):
+def cleanDrugData(df, max_value=None, min_value=None, duplicate='mean'):
     '''
     Clean drug sensitivity data.
     '''
     df.columns = ['Cell', 'Drug', 'LOG50']
     df.Drug = df.Drug.apply(cleanDrugName)
-    df['LOG50'][df['LOG50'] > max_value] = max_value
-    df['LOG50'][df['LOG50'] < min_value] = min_value
+    if max_value is not None:
+        df = df.loc[df['LOG50'] < max_value,:]
+    if min_value is not None:
+        df = df.loc[df['LOG50'] > min_value,:]
     df['LOG50'] = np.log(df['LOG50'])
     if duplicate == 'mean':
         df = df.groupby(by=['Cell', 'Drug'], as_index=False).mean()

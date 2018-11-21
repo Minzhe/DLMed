@@ -5,7 +5,29 @@
 import re
 import numpy as np
 import pandas as pd
+from scipy.sparse import csr_matrix
+from sklearn.preprocessing import OneHotEncoder
 
+############################   drug sensitivity   ############################
+def buildTrainingArray(mut_array, drug_array):
+    '''
+    Build SVM traning data from mutation and drug sentivity data.
+    '''
+    # drug
+    drug_onehot = OneHotEncoder(sparse=False)
+    drugs = drug_onehot.fit_transform(np.reshape(drug_array[:,1], (-1,1)))
+    # cell
+    cells = np.reshape(mut_array, (mut_array.shape[0],-1))
+    # merge
+    X = np.concatenate([np.array(list(map(lambda x: cells[int(x)], drug_array[:,0]))), drugs], axis=1)
+    y = drug_array[:,2]
+    # remove 0 column
+    idx = np.apply_along_axis(sum, 0, X) == 0
+    X = X[:,~idx]
+    return  csr_matrix(X), y
+
+
+############################   fitness   ############################
 def createTrainingTable(scoretable, duplicate='remove'):
     '''
     Convert double knock out score table to training table suitable for machine learning model. 

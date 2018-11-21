@@ -14,7 +14,7 @@ def makeMutationArray(df, cell_index, gene_index):
     '''
     mut_array = np.zeros(shape=(len(cell_index), len(gene_index), max(df['Loci'])+1), dtype=np.int8)
     for idx, row in df.iterrows():
-        c_idx, g_idx, w_idx = cell_index[row['Cell']], gene_index[row['SubGene']], int(row['Loci'])
+        c_idx, g_idx, w_idx = cell_index[row[0]], gene_index[row[1]], int(row[2])
         mut_array[c_idx, g_idx, w_idx] = 1
 
     return mut_array
@@ -39,6 +39,15 @@ def makeExprArray(df, cell_index, gene_index):
                 gene_i = gene + '_' + str(i)
                 if gene_i in subgenes:
                     mat[cell_index[cell], gene_index[gene_i]] = df.loc[cell, gene]
+    # check nan value
+    r_cell_index = {value: key for key, value in cell_index.items()}
+    r_gene_index = {value: key for key, value in gene_index.items()}
+    r_idx = np.where(np.apply_along_axis(all, 1, np.isnan(mat)))[0]
+    if len(r_idx) != 0:
+        print('Warning: {} row - {} is all nan values.'.format(r_idx, [r_cell_index[x] for x in r_idx]))
+    c_idx = np.where(np.apply_along_axis(all, 0, np.isnan(mat)))[0]
+    if len(c_idx) != 0:
+        print('Warning: {} column - {} is all nan values.'.format(c_idx, [r_gene_index[x] for x in c_idx]))
 
     return mat
 
@@ -74,7 +83,7 @@ def mergeMutation(**mut):
     
     return mut_all
 
-def mergeExpression(keep_dup, gene_join='inner', fillna=0, **expr):
+def mergeExpression(keep_dup, gene_join='inner', fillna=None, **expr):
     '''
     Merge expression and cnv data.
     '''
@@ -83,7 +92,7 @@ def mergeExpression(keep_dup, gene_join='inner', fillna=0, **expr):
     if gene_join == 'outer':
         all_genes = functools.reduce(lambda x,y: set(x) | set(y), genes)
         for name in expr.keys():
-            expr[name] = pd.concat([expr[name], pd.DataFrame(columns=list(all_genes-set(expr[name].columns)))], axis=1, sort=True).fillna(0)
+            expr[name] = pd.concat([expr[name], pd.DataFrame(columns=list(all_genes-set(expr[name].columns)))], axis=1, sort=True).fillna(fillna)
     # select common genes
     elif gene_join == 'inner':
         all_genes = functools.reduce(lambda x,y: set(x) & set(y), genes)

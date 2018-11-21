@@ -2,10 +2,36 @@
 ###                                 plot.py                                     ###
 ###################################################################################
 
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-sns.set
+sns.set()
 sns.set_style('darkgrid')
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  heat map  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
+def plotHeatmap(df, cmap=None, mask_value=None, ax=None, cluster=False, return_df=False, cbar=True):
+    '''
+    Plot heatmap and return reordered matrix.
+    '''
+    if cluster:
+        g = sns.clustermap(df)
+        df = df.iloc[g.dendrogram_row.reordered_ind, g.dendrogram_col.reordered_ind]
+    mask = df == mask_value if mask_value is not None else None
+    sns.heatmap(df, cmap=cmap, mask=mask, cbar=cbar, ax=ax)
+    if return_df:
+        return df
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  scatter plot  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
+def plotScatter(x, y, ax, xlabel='', ylabel='', title='', alpha=1, cmap='b'):
+    '''
+    Plot truth vs prediction.
+    '''
+    plt.scatter(x, y, alpha=alpha, edgecolors='none', c=cmap)
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    return ax
+
 
 def plotNegative(phenotable, path):
     '''
@@ -22,14 +48,13 @@ def plotNegative(phenotable, path):
     plt.ylabel('Density')
     plt.savefig(path)
 
-
-def plot_density(title='', xlabel='', ylabel='', legend_title='', **data):
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   density plot   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
+def plot_density(title='', xlabel='', ylabel='', legend_title='', ax=None, **data):
     '''
     Plot density curves.
     '''
     names = data.keys()
     colors = sns.color_palette(palette='hls', n_colors=len(names))
-    f, ax = plt.subplots()
     for i, name in enumerate(names):
         seq = data[name]
         sns.distplot(seq, hist=False, kde=True, label=name, color=colors[i])
@@ -37,9 +62,8 @@ def plot_density(title='', xlabel='', ylabel='', legend_title='', **data):
     ax.set_title(title)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    return f, ax
 
-def plot_multi_density(df, title='', xlabel='', xlim=None, ylim=None, xticks=[], yticks=[], oneplot=True, nrow=None, ncol=None):
+def plot_density_dataframe(df, title='', xlabel='', xlim=None, ylim=None, xticks=[], yticks=[], oneplot=True, nrow=None, ncol=None):
     '''
     Plot density.
     '''

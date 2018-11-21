@@ -1,5 +1,5 @@
 ##############################################################################
-###                         run.predict.svr.py                             ###
+###                      predict.drugsens.fcnn.py                          ###
 ##############################################################################
 
 import os
@@ -8,19 +8,22 @@ import pandas as pd
 from model.fcnn import fcnn
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
-
+import pickle as pkl
 
 proj_path = 'D:/projects/DLCell'
 data_path = os.path.join(proj_path, 'data/curated/crispr.doubleKO.geno.pheno.csv')
 model_path = os.path.join(proj_path, 'code/predict/model/fcnn.random.h5')
 
 ######################    main    #########################
-geno_pheno = pd.read_csv(data_path)
-X, label = geno_pheno.iloc[:, 0:-1], geno_pheno.iloc[:,-1]
-# suffle label
-y = np.random.choice(label, size=len(label), replace=False)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=1234)
+proj_path = '/work/bioinformatics/s418336/projects/DLMed'
+# proj_path = 'D:/projects/DLMed'
+data_path = os.path.join(proj_path, 'data/curated/Lung/merged/ccle_utsw.lung_MutExprCNV_cancergene_drug.array.pkl')
 
+# read data
+with open(data_path, 'rb') as f:
+    data = pkl.load(f)
+X, y = data['X'], data['y']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
 ### random guess
 # coefs = []
 # for i in range(10000):

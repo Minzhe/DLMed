@@ -1,0 +1,19 @@
+.............................................................*.*
+optimization finished, #iter = 10400
+obj = -758032.936407, rho = -2.231387
+nSV = 10758, nBSV = 9987
+..
+Warning: using -h 0 may be faster
+*.*
+optimization finished, #iter = 10462
+obj = -509260.983504, rho = -2.242704
+nSV = 11843, nBSV = 11240
+.*.*
+optimization finished, #iter = 10236
+obj = -640026.559270, rho = -2.240684
+nSV = 11230, nBSV = 10564
+......**.*
+optimization finished, #iter = 10618
+obj = -362558.570625, rho = -2.238382
+nSV = 12470, nBSV = 12021
+................

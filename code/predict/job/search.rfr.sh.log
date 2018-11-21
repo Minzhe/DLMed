@@ -1,0 +1,56 @@
+Building model with RFR:  n_estimator=200, max_feature=log2
+
+************************************************************
+Model RFR.ccle_utsw.MutExprCNV.n_estimator.200.max_feature.log2.joblib finished! 
+Start time: 2018-11-20 21:36:34.663808, End time: 2018-11-20 21:38:51.534841, Time used: 0:02:16.871033
+Traing r2: 0.876337914309316, Testing r2: 0.09916785483366797
+************************************************************
+
+Building model with RFR:  n_estimator=200, max_feature=sqrt
+
+************************************************************
+Model RFR.ccle_utsw.MutExprCNV.n_estimator.200.max_feature.sqrt.joblib finished! 
+Start time: 2018-11-20 21:36:34.657961, End time: 2018-11-20 21:41:01.971339, Time used: 0:04:27.313378
+Traing r2: 0.9134810894103617, Testing r2: 0.36378911303177686
+************************************************************
+
+Building model with RFR:  n_estimator=500, max_feature=log2
+
+************************************************************
+Model RFR.ccle_utsw.MutExprCNV.n_estimator.500.max_feature.log2.joblib finished! 
+Start time: 2018-11-20 21:36:34.763178, End time: 2018-11-20 21:42:13.679397, Time used: 0:05:38.916219
+Traing r2: 0.8780834244208928, Testing r2: 0.10385761848728137
+************************************************************
+
+Building model with RFR:  n_estimator=500, max_feature=sqrt
+
+************************************************************
+Model RFR.ccle_utsw.MutExprCNV.n_estimator.500.max_feature.sqrt.joblib finished! 
+Start time: 2018-11-20 21:36:34.728456, End time: 2018-11-20 21:47:34.724481, Time used: 0:10:59.996025
+Traing r2: 0.9147359680381316, Testing r2: 0.3648571066729628
+************************************************************
+
+Building model with RFR:  n_estimator=1000, max_feature=log2
+
+************************************************************
+Model RFR.ccle_utsw.MutExprCNV.n_estimator.1000.max_feature.log2.joblib finished! 
+Start time: 2018-11-20 21:36:34.837961, End time: 2018-11-20 21:48:19.545466, Time used: 0:11:44.707505
+Traing r2: 0.8786337073072669, Testing r2: 0.1049630109484605
+************************************************************
+
+Building model with RFR:  n_estimator=1000, max_feature=sqrt
+
+************************************************************
+Model RFR.ccle_utsw.MutExprCNV.n_estimator.1000.max_feature.sqrt.joblib finished! 
+Start time: 2018-11-20 21:36:34.818533, End time: 2018-11-20 21:58:00.911476, Time used: 0:21:26.092943
+Traing r2: 0.9148104266407969, Testing r2: 0.3630320231462725
+************************************************************
+
+Building model with RFR:  n_estimator=200, max_feature=auto
+
+************************************************************
+Model RFR.ccle_utsw.MutExprCNV.n_estimator.200.max_feature.auto.joblib finished! 
+Start time: 2018-11-20 21:36:34.655108, End time: 2018-11-21 03:15:39.161437, Time used: 5:39:04.506329
+Traing r2: 0.96116386035393, Testing r2: 0.7012200885573912
+************************************************************
+
