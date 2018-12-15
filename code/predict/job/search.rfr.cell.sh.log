@@ -1,0 +1,56 @@
+Building model with RFR: n_estimator=20, max_feature=auto, criterion=mse, max_depth=None
+
+************************************************************
+Model RFR.ccle_utsw.cell.MutExprCNV.n_estimator.20.max_feature.auto.criterion.mse.max_depth.None.joblib finished! 
+Start time: 2018-12-06 11:40:21.174501, End time: 2018-12-06 11:59:25.217765, Time used: 0:19:04.043264
+Traing r2: 0.9556237862806921, Validation r2: 0.6816626943607607, Testing r2: 0.6922822563159949
+************************************************************
+
+Building model with RFR: n_estimator=40, max_feature=auto, criterion=mse, max_depth=None
+
+************************************************************
+Model RFR.ccle_utsw.cell.MutExprCNV.n_estimator.40.max_feature.auto.criterion.mse.max_depth.None.joblib finished! 
+Start time: 2018-12-06 11:40:21.176351, End time: 2018-12-06 12:16:04.112853, Time used: 0:35:42.936502
+Traing r2: 0.9591756535283439, Validation r2: 0.6907263633020049, Testing r2: 0.697320274744907
+************************************************************
+
+Building model with RFR: n_estimator=60, max_feature=auto, criterion=mse, max_depth=None
+
+************************************************************
+Model RFR.ccle_utsw.cell.MutExprCNV.n_estimator.60.max_feature.auto.criterion.mse.max_depth.None.joblib finished! 
+Start time: 2018-12-06 11:40:21.181299, End time: 2018-12-06 12:33:18.627397, Time used: 0:52:57.446098
+Traing r2: 0.9603505019484623, Validation r2: 0.6913119657640912, Testing r2: 0.6964290278792824
+************************************************************
+
+Building model with RFR: n_estimator=80, max_feature=auto, criterion=mse, max_depth=None
+
+************************************************************
+Model RFR.ccle_utsw.cell.MutExprCNV.n_estimator.80.max_feature.auto.criterion.mse.max_depth.None.joblib finished! 
+Start time: 2018-12-06 11:40:21.185633, End time: 2018-12-06 12:49:51.031251, Time used: 1:09:29.845618
+Traing r2: 0.9607913904690261, Validation r2: 0.6958187537225943, Testing r2: 0.6997154258106789
+************************************************************
+
+Building model with RFR: n_estimator=100, max_feature=auto, criterion=mse, max_depth=None
+
+************************************************************
+Model RFR.ccle_utsw.cell.MutExprCNV.n_estimator.100.max_feature.auto.criterion.mse.max_depth.None.joblib finished! 
+Start time: 2018-12-06 11:40:21.189268, End time: 2018-12-06 13:05:53.026733, Time used: 1:25:31.837465
+Traing r2: 0.9613635716382665, Validation r2: 0.6956891756512738, Testing r2: 0.7010279966263062
+************************************************************
+
+Building model with RFR: n_estimator=200, max_feature=auto, criterion=mse, max_depth=None
+
+************************************************************
+Model RFR.ccle_utsw.cell.MutExprCNV.n_estimator.200.max_feature.auto.criterion.mse.max_depth.None.joblib finished! 
+Start time: 2018-12-06 11:40:21.193011, End time: 2018-12-06 14:27:35.209417, Time used: 2:47:14.016406
+Traing r2: 0.9620467683054753, Validation r2: 0.6965783486175059, Testing r2: 0.7040904375258181
+************************************************************
+
+Building model with RFR: n_estimator=400, max_feature=auto, criterion=mse, max_depth=None
+
+************************************************************
+Model RFR.ccle_utsw.cell.MutExprCNV.n_estimator.400.max_feature.auto.criterion.mse.max_depth.None.joblib finished! 
+Start time: 2018-12-06 11:40:21.197212, End time: 2018-12-06 17:04:18.745228, Time used: 5:23:57.548016
+Traing r2: 0.9625933257778955, Validation r2: 0.6987008761217711, Testing r2: 0.706134549367888
+************************************************************
+

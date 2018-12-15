@@ -31,10 +31,10 @@ ccle_drug_path = os.path.join(proj_path, 'data/curated/Lung/ccle/ccle.lung.gdsc.
 utsw_drug_path = os.path.join(proj_path, 'data/curated/Lung/utsw.mw/utsw.lung_Compound_ED50.csv')
 ctrp_drug_path = os.path.join(proj_path, 'data/curated/Lung/ctrp.lung.csv')
 
-merge = 'ccle_utsw'
+dataset = 'ccle_utsw'
 
 ################################    main    ###################################
-if merge == 'ccle_utsw_ctrp':
+if dataset == 'ccle_utsw_ctrp':
     # >>>>>>>>>>>>>>>>   mutation   <<<<<<<<<<<<<<<<<<< #
     mut_out_path = os.path.join(proj_path, 'data/curated/Lung/merged/merged.lung_Mutation_cancergene.csv')
 
@@ -86,7 +86,7 @@ if merge == 'ccle_utsw_ctrp':
     f.savefig(dens_path)
     drug.to_csv(drug_out_path, index=False)
 
-elif merge == 'ccle_utsw':
+elif dataset == 'ccle_utsw':
     # >>>>>>>>>>>>>>>>   mutation   <<<<<<<<<<<<<<<<<<< #
     mut_out_path = os.path.join(proj_path, 'data/curated/Lung/merged/merged.lung_Mutation_cancergene.array.csv')
 

@@ -12,14 +12,14 @@ def makeMutationArray(df, cell_index, gene_index):
     '''
     Make cell-gene-mutation 3d array.
     '''
-    mut_array = np.zeros(shape=(len(cell_index), len(gene_index), max(df['Loci'])+1), dtype=np.int8)
+    mut_array = np.zeros(shape=(len(cell_index), len(gene_index), max(df['Loci'])+1), dtype=np.float)
     for idx, row in df.iterrows():
         c_idx, g_idx, w_idx = cell_index[row[0]], gene_index[row[1]], int(row[2])
-        mut_array[c_idx, g_idx, w_idx] = 1
+        mut_array[c_idx, g_idx, w_idx] = round(row[3], 3)
 
     return mut_array
 
-def makeExprArray(df, cell_index, gene_index):
+def makeExprArray(df, cell_index, gene_index, impute_na=True):
     '''
     Make expression and copy number variation array.
     '''
@@ -43,11 +43,15 @@ def makeExprArray(df, cell_index, gene_index):
     r_cell_index = {value: key for key, value in cell_index.items()}
     r_gene_index = {value: key for key, value in gene_index.items()}
     r_idx = np.where(np.apply_along_axis(all, 1, np.isnan(mat)))[0]
-    if len(r_idx) != 0:
-        print('Warning: {} row - {} is all nan values.'.format(r_idx, [r_cell_index[x] for x in r_idx]))
     c_idx = np.where(np.apply_along_axis(all, 0, np.isnan(mat)))[0]
-    if len(c_idx) != 0:
-        print('Warning: {} column - {} is all nan values.'.format(c_idx, [r_gene_index[x] for x in c_idx]))
+    if impute_na:
+        if len(r_idx) != 0:
+            print('Warning: {} row - {} is all nan values.'.format(r_idx, [r_cell_index[x] for x in r_idx]))
+            col_mean = np.apply_along_axis(np.nanmean, 0, mat)
+            mat[r_idx,:] = col_mean
+        if len(c_idx) != 0:
+            print('Warning: {} column - {} is all nan values.'.format(c_idx, [r_gene_index[x] for x in c_idx]))
+            mat[:,c_idx] = 0
 
     return mat
 
@@ -69,16 +73,22 @@ def mergeMutation(**mut):
     '''
     Merge mutation table
     '''
+    def mergeAF(af):
+        if len(af) == sum(af == 0.5):
+            return 0.5
+        else:
+            return af[af != 0.5].mean()
+    
     mut_all = list()
     for df in mut.keys():
-        if all(pd.Series(['Cell', 'Gene', 'MutStart']).isin(mut[df].columns.tolist())) is not True:
-            raise KeyError('Input {} dateframe must contains column: Cell, Gene and MutStart!'.format(df))
+        if all(pd.Series(['Cell', 'Gene', 'MutStart', 'AF']).isin(mut[df].columns.tolist())) is not True:
+            raise KeyError('Input {} dateframe must contains column: Cell, Gene, MutStart and AF!'.format(df))
         mut[df]['Source'] = df
-        mut_all.append(mut[df][['Cell', 'Gene', 'MutStart', 'Source']])
+        mut_all.append(mut[df][['Cell', 'Gene', 'MutStart', 'AF', 'Source']])
     mut_all = pd.concat(mut_all)
 
     # merge
-    mut_all = mut_all.groupby(by=['Cell', 'Gene', 'MutStart'], as_index=False).agg({'Source': lambda x: ','.join(x)})
+    mut_all = mut_all.groupby(by=['Cell', 'Gene', 'MutStart'], as_index=False).agg({'AF': mergeAF, 'Source': lambda x: ','.join(x)})
     mut_all.sort_values(by=['Cell', 'Gene', 'MutStart'], inplace=True)
     
     return mut_all

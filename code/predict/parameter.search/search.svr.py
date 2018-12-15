@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # proj_path = 'D:/projects/DLMed'
     data_path = os.path.join(proj_path, 'data/curated/Lung/merged/ccle_utsw.lung_MutExprCNV_cancergene_drug.array.pkl')
     model_path = os.path.join(proj_path, 'code/predict/model/svr/SVR.ccle_utsw.MutExprCNV')
-    out_path = os.path.join(proj_path, 'result/genomic.drugsens/ccle_utsw.MutExprCNV.svr.result.3.csv')
+    out_path = os.path.join(proj_path, 'result/genomic.drugsens/ccle_utsw.MutExprCNV.svr.result.2.csv')
 
     with open(data_path, 'rb') as f:
         data = pkl.load(f)
@@ -53,8 +53,8 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
 
     # hyperparameters
-    C = [20, 30, 40, 50]
-    epsilon = [1, 2]
+    C = [2000, 3000, 4000, 6000]
+    epsilon = [0.1, 0.2, 0.4, 0.8]
     param = {'C': C, 'epsilon': epsilon}
 
     # multiprocess training

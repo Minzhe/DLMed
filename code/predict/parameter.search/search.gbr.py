@@ -14,18 +14,19 @@ from sklearn.ensemble import GradientBoostingRegressor
 import multiprocessing as mp
 
 #############################  function  ##############################
-def GBR_model(X_train, X_test, y_train, y_test, save_path, return_dict, learning_rate, n_estimators, max_features, subsample=1, random_state=1234, verbose=1):
+def GBR_model(X_train, X_test, y_train, y_test, save_path, return_dict, loss, learning_rate, n_estimators, max_features, subsample=1, random_state=1234, verbose=1):
     '''
     Gradient Boosting Regressor model.
     '''
     if os.path.isdir(os.path.dirname(save_path)):
-        model_path = '{}.lr.{}.n_estimator.{}.max_feature.{}.subsample{}.joblib'.format(save_path, learning_rate, n_estimators, max_features, subsample)
+        model_path = '{}.loss.{}.lr.{}.n_estimator.{}.max_feature.{}.subsample{}.joblib'.format(save_path, loss, learning_rate, n_estimators, max_features, subsample)
     else:
         raise ValueError('Folder not exist!')
     # model
-    print('Building model with GBR: lr={}, n_estimator={}, max_feature={}, subsample={}'.format(learning_rate, n_estimators, max_features, subsample))
+    print('Building model with GBR: loss={}, lr={}, n_estimator={}, max_feature={}, subsample={}'.format(loss, learning_rate, n_estimators, max_features, subsample))
     start_time = dt.datetime.now()
-    gbr = GradientBoostingRegressor(learning_rate=learning_rate,
+    gbr = GradientBoostingRegressor(loss=loss, 
+                                    learning_rate=learning_rate,
                                     n_estimators=n_estimators,
                                     max_features=max_features,
                                     subsample=subsample,
@@ -42,7 +43,7 @@ def GBR_model(X_train, X_test, y_train, y_test, save_path, return_dict, learning
     end_time = dt.datetime.now()
     print('\n' + '*'*60 + '\nModel {} finished! \nStart time: {}, End time: {}, Time used: {}'.format(os.path.basename(model_path), start_time, end_time, end_time-start_time))
     print('Traing r2: {}, Testing r2: {}\n'.format(r2_train, r2_test) + '*'*60 + '\n')
-    return_dict[(learning_rate, n_estimators, max_features, subsample)] = learning_rate, n_estimators, max_features, subsample, r2_train, r2_test
+    return_dict[(loss, learning_rate, n_estimators, max_features, subsample)] = loss, learning_rate, n_estimators, max_features, subsample, r2_train, r2_test
 
 #############################  main  ##############################
 if __name__ == '__main__':
@@ -59,27 +60,29 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
 
     # hyperparameters
-    lr = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
-    n_estimators = [600, 800, 1000]
-    subsample = [0.7, 0.8, 0.9]
+    lr = [0.1, 0.2, 0.3, 0.5, 0.9]
+    n_estimators = [300, 400, 600, 900]
+    subsample = [1.0]
     max_features = ['auto']
+    loss = ['ls', 'lad', 'huber', 'quantile']
 
     # multiprocess training
     manager = mp.Manager()
     return_dict = manager.dict()
     jobs = []
-    for lr_ in lr:
-        for n_ in n_estimators:
-            for f_ in max_features:
-                for sub_ in subsample:
-                    p = mp.Process(target=GBR_model, args=(X_train, X_test, y_train, y_test, model_path, return_dict, lr_, n_, f_, sub_,))
-                    jobs.append(p)
-                    p.start()
+    for loss_ in loss:
+        for lr_ in lr:
+            for n_ in n_estimators:
+                for f_ in max_features:
+                    for sub_ in subsample:
+                        p = mp.Process(target=GBR_model, args=(X_train, X_test, y_train, y_test, model_path, return_dict, loss_, lr_, n_, f_, sub_,))
+                        jobs.append(p)
+                        p.start()
     
     for proc in jobs:
         proc.join()
 
-    result = pd.DataFrame(list(return_dict.values()), columns=['learning_rate', 'n_estimators', 'max_features', 'subsample', 'r2_train', 'r2_test'])
+    result = pd.DataFrame(list(return_dict.values()), columns=['loss', 'learning_rate', 'n_estimators', 'max_features', 'subsample', 'r2_train', 'r2_test'])
     result['rank_test'] = result.r2_test.rank(ascending=False)
     result.to_csv(out_path, index=None)
 

@@ -50,6 +50,52 @@ def detect_unnormal(df, test, cutoff):
     pval = np.array(pval)
     return pval, list(df.columns[pval < cutoff])
 
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  split data  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
+def split_train_val_test(index, train_prop=0.7, val_prop=0.2, masked=None):
+    labels = index.copy()
+    if masked is not None:
+        if len(masked) != len(index):
+            raise ValueError('maksed should have same length as index, or None.')
+        else:
+            labels[masked.astype(bool)] = np.nan
+    items = list(set(labels[labels.notnull()]))
+    for item in items:
+        train_idx, val_idx, test_idx = split_train_val_test_once(np.where(labels == item)[0], train_prop, val_prop)
+        labels[train_idx] = 'Train'
+        labels[val_idx] = 'Val'
+        labels[test_idx] = 'Test'
+    return labels
+
+def split_train_val_test_once(sequence, train, val):
+    seq = sequence.copy()
+    np.random.shuffle(seq)
+    train_idx = seq[:int(round(len(seq)*train))]
+    val_idx = seq[int(round(len(seq)*train)):int(round(len(seq)*(train+val)))]
+    test_idx = seq[int(round(len(seq)*(train+val))):]
+    if len(train_idx) == 0 or len(val_idx) == 0 or len(test_idx) == 0:
+        raise ValueError('Not enough long sequence to split')
+    return train_idx, val_idx, test_idx
+
+def split_train_val(index, train_prop=0.75, masked=None):
+    if masked is not None:
+        if len(masked) != len(index):
+            raise ValueError('masked should have same length as index, or None.')
+        else:
+            items = np.array(list(set(index[~masked])))
+    else:
+        items = np.array(list(set(index)))
+    np.random.shuffle(items)
+    train = items[:int(round(len(items)*train_prop))]
+    val = items[int(round(len(items)*train_prop)):]
+    train_idx = index.isin(list(train))
+    val_idx = index.isin(list(val))
+
+    labels = index.copy()
+    labels[train_idx] = 'Train'
+    labels[val_idx] = 'Val'
+    labels[~(train_idx | val_idx)] = np.nan
+    return labels
+
 # >>>>>>>>>>>>>>>>>>>>>>>>>  data matrix  <<<<<<<<<<<<<<<<<<<<<<<<<< #
 def sort_by_index(df, index, ascending, axis=0):
     if axis == 0:
@@ -145,12 +191,12 @@ def divideGene(mut, gene_loc_encoder):
     '''
     Divide gene with windows.
     '''
-    if sum(pd.Series(['Cell', 'Gene', 'MutStart']).isin(mut.columns.tolist())) != 3:
-        raise ValueError('Parameter mut should contains columns "Cell", "Gene", "MutStart".')
-    mut = mut[['Cell', 'Gene', 'MutStart']]
+    if sum(pd.Series(['Cell', 'Gene', 'MutStart', 'AF']).isin(mut.columns.tolist())) != 4:
+        raise ValueError('Parameter mut should contains columns "Cell", "Gene", "MutStart" and "AF".')
+    mut = mut[['Cell', 'Gene', 'MutStart', 'AF']]
     mut.sort_values(by=['Cell', 'Gene', 'MutStart'], inplace=True)
     mut.reset_index(drop=True, inplace=True)
-    mut.columns = ['Cell', 'SubGene', 'Loci']
+    mut.columns = ['Cell', 'SubGene', 'Loci', 'AF']
     
     mut['SubGene'], mut['Loci'] = zip(*list(mut.apply(lambda x: gene_loc_encoder[(x['SubGene'], x['Loci'])], axis=1)))
     mut.sort_values(by=['Cell', 'SubGene', 'Loci'], inplace=True)

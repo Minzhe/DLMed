@@ -3,10 +3,10 @@
 ###################################################################################
 
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
-sns.set()
-sns.set_style('darkgrid')
+import seaborn as sns
+plt.style.use('seaborn')
+# sns.set_style('darkgrid')
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  heat map  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
 def plotHeatmap(df, cmap=None, mask_value=None, ax=None, cluster=False, return_df=False, cbar=True):

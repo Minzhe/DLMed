@@ -3,24 +3,26 @@
 ##################################################################################
 # curate utsw mike white mutation in loci level
 
-proj_path = 'D:/projects/DLMed'
+proj_path = '/work/bioinformatics/s418336/projects/DLMed/'
 import os
 import re
 import sys
 import pandas as pd
 import numpy as np
 sys.path.append(os.path.join(proj_path, 'code'))
+import matplotlib.pyplot as plt
+import seaborn as sns
 from utility import utility as util
 
 geneanno_path = os.path.join(proj_path, 'data/curated/cancer.gene.anno.csv')
 mutation_path = os.path.join(proj_path, 'data/UTSW_MW/Cell.Line.mutation.txt')
-out_path = os.path.join(proj_path, 'data/curated/lung/utsw.mw/lung_Mutation_cancergene.csv')
-out_loci_path = os.path.join(proj_path, 'data/curated/lung/utsw.mw/lung_Mutation_cancergene_loci.csv')
+out_path = os.path.join(proj_path, 'data/curated/Lung/utsw.mw/utsw.lung_Mutation_cancergene.csv')
+out_loci_path = os.path.join(proj_path, 'data/curated/Lung/utsw.mw/utsw.lung_Mutation_cancergene_loci.csv')
 
 ################################    main    ###################################
-mutation = pd.read_table(mutation_path, sep='\t', usecols=['official', 'Cell', 'Position'])
-mutation.columns = ['Gene', 'Cell', 'MutStart']
-mutation = mutation[['Cell', 'Gene', 'MutStart']]
+mutation = pd.read_table(mutation_path, sep='\t', usecols=['official', 'Cell', 'Position', 'Allele_Freq'])
+mutation.columns = ['Gene', 'Cell', 'MutStart', 'AF']
+mutation = mutation[['Cell', 'Gene', 'MutStart', 'AF']]
 
 # clean cell line name
 mutation.Cell = mutation.Cell.apply(util.cleanCellLine)
@@ -29,6 +31,8 @@ mutation.Cell = mutation.Cell.apply(util.cleanCellLine)
 genes = pd.read_csv(geneanno_path)['Gene'].tolist()
 mutation = mutation.loc[mutation.Gene.isin(genes),:]
 mutation.sort_values(by=['Cell', 'Gene'], inplace=True)
+# sns.distplot(mutation.AF)
+# plt.savefig(os.path.join(proj_path, 'data/curated/Lung/utsw.mw/mutation_af.png'))
 mutation.to_csv(out_path, index=None)
 
 # divide genes
