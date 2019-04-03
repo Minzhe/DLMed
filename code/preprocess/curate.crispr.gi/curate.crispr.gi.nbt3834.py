@@ -9,12 +9,9 @@ import pandas as pd
 from sklearn.preprocessing import quantile_transform, scale
 import matplotlib.pyplot as plt
 import seaborn as sns
-import utility as util
 
-proj_path = 'D:/projects/DLCell'
-pheno_path = os.path.join(proj_path, 'data/CRISPRi/crispr.GI.nbt3834.phenotype.xlsx')
-out_dir = os.path.join(proj_path, 'data/curated')
-out2_path = os.path.join(proj_path, 'data/curated/crispr.doubleKO.nbt3834.geno.pheno.norm.dense.csv')
+proj_path = '/work/bioinformatics/s418336/projects/DLMed'
+data_path = os.path.join(proj_path, 'data/CRISPR.GI/crispr.GI.nbt3834.phenotype.xlsx')
 
 #################################    function    ###################################
 def getSingleGenePheno(scoretable):
@@ -44,20 +41,31 @@ def concatSingleDualGenePheno(singletable, dualtable):
 
 
 
-###########################################    main    #############################################
-pheno = pd.read_excel(pheno_path, usecols=[0,1,2,3], names = ['Gene_Pair', 'Gene1_score', 'Gene2_score', 'score'])
-pheno['Gene1'] = pheno['Gene_Pair'].apply(lambda x: x.split('__')[0])
-pheno['Gene2'] = pheno['Gene_Pair'].apply(lambda x: x.split('__')[1])
-pheno = pheno[['Gene1', 'Gene2', 'Gene1_score', 'Gene2_score', 'score']]
-allgenes = np.sort(pheno.Gene1.append(pheno.Gene2).unique())
+###########################################    phenotype    #############################################
+# out_dir = os.path.join(proj_path, 'data/curated')
+# out2_path = os.path.join(proj_path, 'data/curated/crispr.doubleKO.nbt3834.geno.pheno.norm.dense.csv')
+# pheno = pd.read_excel(pheno_path, usecols=[0,1,2,3], names = ['Gene_Pair', 'Gene1_score', 'Gene2_score', 'score'])
+# pheno['Gene1'] = pheno['Gene_Pair'].apply(lambda x: x.split('__')[0])
+# pheno['Gene2'] = pheno['Gene_Pair'].apply(lambda x: x.split('__')[1])
+# pheno = pheno[['Gene1', 'Gene2', 'Gene1_score', 'Gene2_score', 'score']]
+# allgenes = np.sort(pheno.Gene1.append(pheno.Gene2).unique())
 
-single_gene_pheno = getSingleGenePheno(np.concatenate((pheno[['Gene1', 'Gene1_score']].values, pheno[['Gene2', 'Gene2_score']].values)))
-dual_gene_pheno = getDualGenePheno(pheno[['Gene1', 'Gene2', 'score']])
-geno_pheno = concatSingleDualGenePheno(single_gene_pheno, dual_gene_pheno)
-geno_pheno_norm = util.quantile_normalize(geno_pheno, center='negative')
-geno_pheno_norm.to_csv(os.path.join(out_dir, 'crispr.doubleKO.nbt3834.geno.pheno.norm.dense.csv'), index=None)
+# single_gene_pheno = getSingleGenePheno(np.concatenate((pheno[['Gene1', 'Gene1_score']].values, pheno[['Gene2', 'Gene2_score']].values)))
+# dual_gene_pheno = getDualGenePheno(pheno[['Gene1', 'Gene2', 'score']])
+# geno_pheno = concatSingleDualGenePheno(single_gene_pheno, dual_gene_pheno)
+# geno_pheno_norm = util.quantile_normalize(geno_pheno, center='negative')
+# geno_pheno_norm.to_csv(os.path.join(out_dir, 'crispr.doubleKO.nbt3834.geno.pheno.norm.dense.csv'), index=None)
 
 # geno_pheno_norm = concatSingleDualGenePheno(single_gene_pheno, dual_gene_pheno, quantile_norm=True)
 # geno_pheno_norm.to_csv(os.path.join(out_dir, 'crispr.doubleKO.nbt3834.geno.pheno.norm.sparse.csv'), index=None)
 # geno_pheno_norm = makeTrainingTable(geno_pheno_norm)
 # geno_pheno_norm.to_csv(os.path.join(out_dir, 'crispr.doubleKO.nbt3834.geno.pheno.norm.dense.csv'), index=None)
+
+###########################################    phenotype    #############################################
+dense_out = os.path.join(proj_path, 'data/curated/K562/crispr.doubleKO.nbt3834.geno.giscore.dense.csv')
+data = pd.read_excel(data_path, usecols=[0,6,7], names=['Gene_Pair', 'gi_t_score', 'gi_m_score'])
+data['Gene1'] = data['Gene_Pair'].apply(lambda x: x.split('__')[0])
+data['Gene2'] = data['Gene_Pair'].apply(lambda x: x.split('__')[1])
+data = data[['Gene1', 'Gene2', 'gi_t_score', 'gi_m_score']]
+data = data.loc[data.Gene1 != data.Gene2,:]
+data.to_csv(dense_out, index=None)

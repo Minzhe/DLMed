@@ -3,7 +3,7 @@
 #########################################################################################
 # integrate multi-genomic data in loci level
 
-proj_path = 'D:/projects/DLCell'
+proj_path = '/work/bioinformatics/s418336/projects/DLMed'
 import os
 import re
 import sys

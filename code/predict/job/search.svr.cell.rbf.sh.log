@@ -1,0 +1,76 @@
+.......................................................................................................................*...........*
+optimization finished, #iter = 47488
+obj = -32471906.532455, rho = -2.458495
+nSV = 27283, nBSV = 15102
+...*.*
+optimization finished, #iter = 18829
+obj = -4471875.817032, rho = -2.551333
+nSV = 27764, nBSV = 26019
+..
+Warning: using -h 0 may be faster
+*
+optimization finished, #iter = 20483
+obj = -468693.576486, rho = -2.559264
+nSV = 28039, nBSV = 27748
+...................*..*
+optimization finished, #iter = 22214
+obj = -5666925.875847, rho = -2.589419
+nSV = 33731, nBSV = 32057
+...............*...........*.*
+optimization finished, #iter = 54446
+obj = -41854107.580424, rho = -2.529968
+nSV = 33611, nBSV = 19750
+
+Warning: using -h 0 may be faster
+*
+optimization finished, #iter = 23710
+obj = -591781.187934, rho = -2.592355
+nSV = 33836, nBSV = 33524
+Building model with SVR: C=1000, epsilon=0.5
+[LibSVM]
+************************************************************
+Model SVR.ccle_utsw.cell.MutExpr.kernel.rbf.gamma.auto.C.1000.epsilon.0.5.joblib finished! 
+Start time: 2019-03-22 09:26:26.584431, End time: 2019-03-22 10:45:28.195404, Time used: 1:19:01.610973
+Traing r2: 0.5340175218049243, Validation r2: 0.19677272767333343, Testing r2: 0.15960047172155456
+************************************************************
+
+Building model with SVR: C=100, epsilon=0.5
+[LibSVM]
+************************************************************
+Model SVR.ccle_utsw.cell.MutExpr.kernel.rbf.gamma.auto.C.100.epsilon.0.5.joblib finished! 
+Start time: 2019-03-22 09:26:26.577726, End time: 2019-03-22 10:48:03.715166, Time used: 1:21:37.137440
+Traing r2: 0.12945513876593728, Validation r2: 0.09141583928426589, Testing r2: 0.055633151861651964
+************************************************************
+
+Building model with SVR: C=10, epsilon=0.5
+[LibSVM]
+************************************************************
+Model SVR.ccle_utsw.cell.MutExpr.kernel.rbf.gamma.auto.C.10.epsilon.0.5.joblib finished! 
+Start time: 2019-03-22 09:26:26.571587, End time: 2019-03-22 10:49:30.851900, Time used: 1:23:04.280313
+Traing r2: 0.0403758824717233, Validation r2: -0.004899681351516083, Testing r2: -0.023467641456667687
+************************************************************
+
+Building model with SVR: C=100, epsilon=0.1
+[LibSVM]
+************************************************************
+Model SVR.ccle_utsw.cell.MutExpr.kernel.rbf.gamma.auto.C.100.epsilon.0.1.joblib finished! 
+Start time: 2019-03-22 09:26:26.574613, End time: 2019-03-22 11:02:24.575577, Time used: 1:35:58.000964
+Traing r2: 0.12659162590107864, Validation r2: 0.08959689292746487, Testing r2: 0.052175297249774655
+************************************************************
+
+Building model with SVR: C=10, epsilon=0.1
+[LibSVM]
+************************************************************
+Model SVR.ccle_utsw.cell.MutExpr.kernel.rbf.gamma.auto.C.10.epsilon.0.1.joblib finished! 
+Start time: 2019-03-22 09:26:26.569719, End time: 2019-03-22 11:04:35.515172, Time used: 1:38:08.945453
+Traing r2: 0.035558467476605404, Validation r2: -0.008444111724885683, Testing r2: -0.028088758572500927
+************************************************************
+
+Building model with SVR: C=1000, epsilon=0.1
+[LibSVM]
+************************************************************
+Model SVR.ccle_utsw.cell.MutExpr.kernel.rbf.gamma.auto.C.1000.epsilon.0.1.joblib finished! 
+Start time: 2019-03-22 09:26:26.581502, End time: 2019-03-22 11:04:51.096208, Time used: 1:38:24.514706
+Traing r2: 0.5394143935601021, Validation r2: 0.19150158954817553, Testing r2: 0.1517179387113472
+************************************************************
+

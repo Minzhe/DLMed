@@ -3,9 +3,37 @@
 #################################################################################
 # This script is to curate cancer related genes for further labelling.
 
+import os
+import numpy as np
 import pandas as pd
+from functools import reduce
+
+proj_dir = '/work/bioinformatics/s418336/projects/DLMed'
+cancer_gene_path = os.path.join(proj_dir, 'data/GeneSet/Census_all.csv')
+oncogenic_path = os.path.join(proj_dir, 'data/GeneSet/c6.all.v6.2.symbols.gmt')
+cgn_path = os.path.join(proj_dir, 'data/GeneSet/c4.cgn.v6.2.symbols.gmt')
+pertub_path = os.path.join(proj_dir, 'data/GeneSet/c2.cgp.v6.2.symbols.gmt')
+geneset_out = os.path.join(proj_dir, 'data/curated/cancer.gene.csv')
+uniprot_path = os.path.join(proj_dir, 'data/UniProt/uniprot.human.txt')
 
 ########################   fucntion   ###########################
+def read_gsea(file):
+    '''
+    Read GESA gene set .gmt file.
+    '''
+    with open(file) as f:
+        lines = f.readlines()
+    
+    name, url, genes = list(), list(), list()
+    for line in lines:
+        items = line.strip().split('\t')
+        name.append(items[0])
+        url.append(items[1])
+        genes.append(';'.join(items[2:]))
+
+    return pd.DataFrame({'Name': name, 'Url': url, 'Genes': genes})     
+
+
 def annotateGene(row):
     '''
     Annotate genes based on census description of roles in cancer.
@@ -68,26 +96,38 @@ def editDict(genedict):
     del genedict['IGK@']
     
 
-
-anno_path = "D:/projects/DLCell/data/Cosmic/Census_all.csv"
-anno_out = "D:/projects/DLCell/data/Cosmic/cancer.gene.anno.csv"
-uniprot_path = "D:/projects/DLCell/data/UniProt/uniprot.human.txt"
-
 ###########################   main   ###############################
-### filter genes
-gene_anno = pd.read_csv(anno_path, header=0)[['Gene Symbol', 'Tumour Types(Somatic)', 'Role in Cancer']].fillna('')
+### census genes
+gene_anno = pd.read_csv(cancer_gene_path, header=0)[['Gene Symbol', 'Tumour Types(Somatic)', 'Role in Cancer']].fillna('')
 gene_anno.columns = ['Gene', 'Tissue', 'Role']
 gene_anno.Role = gene_anno.apply(annotateGene, axis=1)
 gene_anno = gene_anno[['Gene', 'Role']]
+cancer_gene = list(gene_anno['Gene'])
 
-### prase uniprot
-unip = pd.read_csv(uniprot_path, sep='\t')[['Entry', 'Entry name', 'Gene names']].fillna('')
-unip.columns = ['Uniprot_AC', 'Uniprot_ID', 'Gene']
-unip_dict = gene2Uniprot(unip, verbose=False)
+### GSEA oncogenic gene set
+oncogenic = read_gsea(oncogenic_path)
+oncogenic_gene = reduce(lambda a,b: a+b, oncogenic.Genes.apply(lambda x: x.split(';')))
+oncogenic_gene = np.unique(pd.Series(oncogenic_gene))
+print(oncogenic.shape[0])
+print(oncogenic_gene)
+print(len(oncogenic_gene))
+print(len(set(cancer_gene) | set(oncogenic_gene)))
 
-### add uniprot protein name
-gene_anno['Uniprot_AC'] = gene_anno.Gene.apply(lambda x: ';'.join(parseGene(unip_dict, x)[0]))
-gene_anno['Uniprot_ID'] = gene_anno.Gene.apply(lambda x: ';'.join(parseGene(unip_dict, x)[1]))
-print(gene_anno.head())
+### GSEA cancer gene neighborhoods
+cgn = read_gsea(cgn_path)
+cgn_gene = reduce(lambda a,b: a+b, cgn.Genes.apply(lambda x: x.split(';')))
+cgn_gene = np.unique(pd.Series(cgn_gene))
+print(cgn.shape[0])
+print(cgn_gene)
+print(len(cgn_gene))
+print(len(set(cancer_gene) | set(cgn_gene)))
 
-# gene_anno.to_csv(anno_out, index=None)
+### GSEA chemical pertubation
+pertub = read_gsea(pertub_path)
+pertub_gene = reduce(lambda a,b: a+b, pertub.Genes.apply(lambda x: x.split(';')))
+pertub_gene = np.unique(pertub_gene)
+print(pertub.shape[0])
+print(pertub_gene)
+print(len(pertub_gene))
+print(len(set(cancer_gene) | set(pertub_gene)))
+

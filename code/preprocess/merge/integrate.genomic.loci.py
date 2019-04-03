@@ -3,7 +3,7 @@
 #########################################################################################
 # integrate multi-genomic data in loci level
 
-proj_path = 'D:/projects/DLMed'
+proj_path = '/work/bioinformatics/s418336/projects/DLMed/'
 import os
 import re
 import sys
@@ -18,7 +18,7 @@ mut_path = os.path.join(proj_path, 'data/curated/Lung/merged/merged.lung_Mutatio
 expr_path = os.path.join(proj_path, 'data/curated/Lung/merged/merged.lung_RNAseq_cancergene.csv')
 cnv_path = os.path.join(proj_path, 'data/curated/Lung/merged/merged.lung_CNV_cancergene.csv')
 drug_path = os.path.join(proj_path, 'data/curated/Lung/merged/merged.lung_drug.csv')
-out_path = os.path.join(proj_path, 'data/curated/Lung/merged/merged.lung_MutExprCNV_cancergene_drug_loci.pkl')
+out_path = os.path.join(proj_path, 'data/curated/Lung/merged/merged.lung_MutExprCNV_cancergene_drug_loci.untruncated.pkl')
 
 ###############################    main    ##################################
 # read data
@@ -37,7 +37,9 @@ drug_index = {drug:idx for idx, drug in enumerate(np.unique(drug['Drug']))}
 # drug array
 drug['Cell'] = drug['Cell'].apply(lambda x: cell_index[x])
 drug['Drug'] = drug['Drug'].apply(lambda x: drug_index[x])
-drug_array = np.array(drug[['Cell', 'Drug', 'LOG50']])
+source_dict = {'CCLE': 1, 'UTSW':2, 'CTRP': 3}
+drug['Source'] = drug['Source'].apply(lambda x: source_dict[x])
+drug_array = np.array(drug)
 
 # >>>>>>>>>>>>>> expr and cnv data <<<<<<<<<<<<<< #
 # build gene index dict

@@ -9,7 +9,7 @@ import re
 
 
 ############################   function   ##########################
-def filterRNASeq(rnaseq, tissue, genelist):
+def filterRNASeq(rnaseq, tissue, genelist='all'):
     '''
     Select specific tissue cell lines.
     '''
@@ -23,29 +23,32 @@ def filterRNASeq(rnaseq, tissue, genelist):
     print('  Number of cell lines: {}'.format(len(expr.columns)-1))
 
     ### filter cancer genes
-    expr = expr.loc[expr.Gene.isin(genelist),:]
+    if isinstance(genelist, list):
+        expr = expr.loc[expr.Gene.isin(genelist),:]
     expr.sort_values(by=['Gene'], inplace=True)
     expr.set_index('Gene', inplace=True)
 
     return expr.transpose()
 
 
-proj_path = "D:/projects/DLCell"
-rnaseq_path = os.path.join(proj_path, "data/DepMap/CCLE_RNAseq_RPKM_20180718.gct")
-geneanno_path = os.path.join(proj_path, "data/curated/cancer.gene.anno.csv")
+proj_path = '/work/bioinformatics/s418336/projects/DLMed/'
+rnaseq_path = os.path.join(proj_path, 'data/DepMap/CCLE_RNAseq_RPKM_20180718.gct')
+geneanno_path = os.path.join(proj_path, 'data/curated/cancer.gene.anno.csv')
 
 
 ############################   main   ################################
 # read cancer gene list
-anno = pd.read_csv(geneanno_path)['Gene'].values
+anno = list(pd.read_csv(geneanno_path)['Gene'].values)
 
 # read gene expression data
 ccle_rnaseq = pd.read_csv(rnaseq_path, sep='\t', header=0, skiprows=2)
 
 # filter for lung cancer cell lines
 print('Filtering lung cancer cell line ...')
-lung_expr = filterRNASeq(rnaseq=ccle_rnaseq, tissue='LUNG', genelist=anno)
-lung_expr.to_csv(os.path.join(proj_path, 'data/curated/lung_RNAseq_cancergene.csv'))
+# lung_expr = filterRNASeq(rnaseq=ccle_rnaseq, tissue='LUNG', genelist=anno)
+# lung_expr.to_csv(os.path.join(proj_path, 'data/curated/lung_RNAseq_cancergene.csv'))
+lung_expr = filterRNASeq(rnaseq=ccle_rnaseq, tissue='LUNG', genelist='all')
+lung_expr.to_csv(os.path.join(proj_path, 'data/curated/Lung/ccle/ccle.lung_RNAseq_allgene.csv'))
 
 # # filter for breast cancer cell lines
 # print('Filtering breast cancer cell lines ...')
