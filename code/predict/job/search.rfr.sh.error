@@ -274,4 +274,7 @@
 [Parallel(n_jobs=1)]: Done  40 out of  40 | elapsed:    2.1s finished
 [Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
 [Parallel(n_jobs=1)]: Done  40 out of  40 | elapsed:    0.5s finished
+<<<<<<< HEAD
 slurmstepd: error: *** JOB 879251 ON Nucleus117 CANCELLED AT 2018-12-15T15:49:06 ***
+=======
+>>>>>>> 352640f04dcf069bb4e9ee4d5dc324c238120ea9
