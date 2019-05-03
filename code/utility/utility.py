@@ -8,8 +8,10 @@ import pandas as pd
 from scipy.spatial import distance as dist
 from scipy.cluster import hierarchy as h
 from scipy.stats import shapiro, normaltest, hypergeom
+import scipy.optimize as opt
 from sklearn.preprocessing import quantile_transform, scale
 import matplotlib.pyplot as plt
+# plt.style.use('seaborn')
 
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  normalize  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
@@ -204,7 +206,7 @@ def cleanCellLine(name):
     Clean cell line name.
     '''
     name = re.sub(r'_[ABCD]$', '', name.upper())
-    name = re.sub(r'[-_\[\]]', '', name)
+    name = re.sub(r'[-_\[\]\(\)]', '', name)
     if re.match(r'^H[0-9]+$', name):
         name = 'NCI' + name
     return name
@@ -235,6 +237,7 @@ def cleanDrugData(df, max_value=None, min_value=None, duplicate='mean'):
 # ************************************************************************** #
 #                                statistics                                  #
 # ************************************************************************** #
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  hypergeometric  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
 def hyper_test(genelist, targetlist, poollist, log=False, return_dict=None, key=None):
     '''
     Calculate hypergeometric test p-value
@@ -261,9 +264,6 @@ def hyper_tests(genelist, targetlists, poollist, log=False, return_dict=None, ke
             return_dict[key] = pd.Series({name: hyper_test(genelist, target, poollist, log) for name, target in targetlists.items()})
         else:
             raise ValueError('key should not be None.')
-
-        
-
 
 # def hyper_p(genelist, targetlist, totallist, log=False):
 #     '''
@@ -298,5 +298,60 @@ def hyper_tests(genelist, targetlists, poollist, log=False, return_dict=None, ke
 #             p_val.append(hyper_p(genelist=gene_sample, targetlist=targetlist, totallist=totallist, log=log))
 #         return p_val
 
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  dose response curve  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
+class DRC(object):
+    def __init__(self, dose, resp):
+        self.dose = list(dose)
+        self.resp = list(resp)
+        self.fit = self.estimate()
         
+    @staticmethod
+    def ll4(x, b, c, d, e):
+        '''
+        This function is basically a copy of the LL.4 function from the R drc package with
+        - b: hill slope
+        - c: min response
+        - d: max response
+        - e: EC50
+        '''
+        return c+(d-c)/(1+np.exp(b*(np.log(x)-np.log(e))))
+    
+    def estimate(self):
+        try:
+            coef, cov = opt.curve_fit(self.ll4, self.dose, self.resp)
+            self.b, self.c, self.d, self.e = coef
+            return True
+        except RuntimeError:
+            return False
+    
+    def get_resp(self, x):
+        return self.c+(self.d-self.c)/(1+np.exp(self.b*(np.log(x)-np.log(self.e))))
+    
+    def get_ic50(self):
+        return self.e
+    
+    def plot_drc(self, pred, path, title):
+        x0 = np.log(min(self.dose)) - 0.5
+        x1 = max(np.log(self.e) * 2 - x0, max(np.log(self.dose)) + 0.5)
+        x = np.linspace(x0, x1, 100)
+        y = self.get_resp(np.exp(x))
+        # plot drc
+        f, ax = plt.subplots(figsize=(8,6))
+        plt.plot(x, y, lw=2)
+        plt.scatter(np.log(self.dose), self.resp, marker='X', c='black')
+        plt.axvline(pred, c='#00ba38', lw=2)
+        plt.axvline(np.log(self.e), c='#f7766c', lw=2)
+        plt.title(title, fontsize=30)
+        plt.xlabel('log(conc.)')
+        plt.ylabel('response')
+        plt.grid(linestyle='--')
+        f.savefig(path, transparent=True)
+        plt.close()
+
+    # b = 1
+    #     c = 0
+    #     d = 100
+    #     e = 0.4
+    #     dose = np.exp(np.linspace(-5, 3, num=30))
+    #     resp = self.ll4(dose, b, c, d, e)
 

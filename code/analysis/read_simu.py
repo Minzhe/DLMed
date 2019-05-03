@@ -10,6 +10,7 @@ import glob
 import pandas as pd
 import numpy as np
 import pickle as pkl
+import multiprocessing as mp
 from utility import utility as util
 
 
@@ -29,14 +30,20 @@ def read_simu(path, loci2gene, cell_index, drug_index):
 
 
 ##################################  main  ######################################
-simu_path = glob.glob(os.path.join(proj_dir, 'result/simulation/random_single_mut_simulation/ic50_cnn_model_cell_*_drug_*.pkl'))
-loci_anno_path = os.path.join(proj_dir, 'result/simulation/random_single_mut_simulation/ic50_cnn_model_alleles.pkl')
+simu_path = glob.glob(os.path.join(proj_dir, 'result/simulation/simulation.random_single_mut/ic50_cnn_model_cell_*_drug_*.pkl'))
+loci_anno_path = os.path.join(proj_dir, 'result/simulation/simulation.random_single_mut/ic50_cnn_model_alleles.pkl')
 
 # location annotation
 with open(loci_anno_path, 'rb') as f:
     data = pkl.load(f)
     loci, gene_index, drug_index, cell_index = data['alleles'], data['gene_index'], data['drug_index'], data['cell_index']
-    loci2gene = [gene_index[l].split('_')[0]+'_'+str(pos) for l, pos in loci]
+    loci2gene = [gene_index[l]+'_'+str(pos) for l, pos in loci]
 
-for path in simu_path:
-    read_simu(path, loci2gene, cell_index, drug_index)
+for i in range(0, len(simu_path), 16):
+    jobs = []
+    for path in simu_path[i:i+16]:
+        p = mp.Process(target=read_simu, args=(path, loci2gene, cell_index, drug_index,))
+        jobs.append(p)
+        p.start()
+    for proc in jobs:
+        proc.join()
