@@ -2,8 +2,8 @@
 ###                              curate.CTRP.py                                 ###
 ###################################################################################
 # curate CTRP drug sensitivity dataset
-
-proj_dir = 'D:/projects/DLMed'
+# proj_dir = 'D:/projects/DLMed'
+proj_dir = '/work/bioinformatics/s418336/projects/DLMed/'
 import os
 import pandas as pd
 
@@ -21,7 +21,7 @@ exper_data = pd.read_table(exper_path, sep='\t', index_col=0, usecols=['experime
 
 # filter and map lung cancer cell line
 cell_data.fillna('', inplace=True)
-cell_data = cell_data.loc[cell_data['ccle_primary_site'].str.upper().str.contains('LUNG'),:]
+# cell_data = cell_data.loc[cell_data['ccle_primary_site'].str.upper().str.contains('LUNG'),:]
 
 # map experiment to cell line
 fit_data.experiment_id = fit_data.experiment_id.apply(lambda x: exper_data.loc[x] if x in exper_data.index else None)
@@ -36,5 +36,7 @@ fit_data.master_cpd_id = fit_data.master_cpd_id.apply(lambda x: comp_data.loc[x]
 fit_data.columns = ['Cell', 'EC50', 'Drug']
 fit_data = fit_data[['Cell', 'Drug', 'EC50']]
 fit_data.sort_values(by=['Cell', 'Drug'], inplace=True)
+print(fit_data)
+exit()
 
 fit_data.to_csv(out_path, index=None)
